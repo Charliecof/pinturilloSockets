@@ -15,16 +15,23 @@ const io = new Server(server, {
 app.use(cors);
 
 io.on('connection', (socket) => {
-    socket.join('test')
-	console.log('user');
 	console.log('Clients number', io.engine.clientsCount);
+	socket.join("room1");
+	socket.on('join',(room)=>{
+		console.log('Joining ' + room);
+		socket.join(room);
+	})
 	socket.on('drawingSend', (data) => {
-		io.emit('otherData', data);
-	});
+		socket.to(data.room).emit('otherData',data.canvasData);
+	});	
+	socket.on('chat',(data)=>{
+		socket.to(data.room).emit('receiveChat',data.message)
+	})
 });
+
 
 app.get('/', (req, res, next) => {
 	res.send('Hola');
 });
 
-server.listen(4002, () => console.log('Server running on port 4000'));
+server.listen(4000, () => console.log('Server running on port 4000'));
